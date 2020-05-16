@@ -7,6 +7,12 @@ from setuptools import setup, find_packages
 with open("README.md") as f:
     description = f.read()
 
+extras_require = {
+    'basler': ['pylonctl'],
+    'eiger': ['aiohttp', 'aiodns']
+}
+extras_require['all'] = list(set.union(*(set(i) for i in extras_require.values())))
+
 setup(
     name="lima-cli",
     author="Jose Tiago Macara Coutinho",
@@ -23,7 +29,16 @@ setup(
         'console_scripts': [
             'lima = lima_cli:main'
         ],
+        'lima.cli.camera': [
+            'Basler = lima_cli.camera.basler:basler [basler]',
+            'Eiger = lima_cli.camera.eiger:eiger [eiger]',
+        ],
+        'lima.cli.camera.scan': [
+            'Basler = lima_cli.camera.basler:scan [basler]',
+            'Eiger = lima_cli.camera.eiger:scan [eiger]',
+        ],
     },
+    extras_require=extras_require,
     description="Lima CLI",
     license="GPLv3+",
     long_description=description,
