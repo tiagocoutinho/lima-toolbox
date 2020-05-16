@@ -14,7 +14,7 @@ extras_require = {
 extras_require['all'] = list(set.union(*(set(i) for i in extras_require.values())))
 
 setup(
-    name="lima-cli",
+    name="lima-toolbox",
     author="Jose Tiago Macara Coutinho",
     author_email="coutinhotiago@gmail.com",
     classifiers=[
@@ -27,25 +27,25 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'lima = lima_cli:main'
+            'lima = lima_toolbox.cli:main'
         ],
         'lima.cli.camera': [
-            'Basler = lima_cli.camera.basler:basler [basler]',
-            'Eiger = lima_cli.camera.eiger:eiger [eiger]',
+            'Basler = lima_toolbox.camera.basler:basler [basler]',
+            'Eiger = lima_toolbox.camera.eiger:eiger [eiger]',
         ],
         'lima.cli.camera.scan': [
-            'Basler = lima_cli.camera.basler:scan [basler]',
-            'Eiger = lima_cli.camera.eiger:scan [eiger]',
+            'Basler = lima_toolbox.camera.basler:scan [basler]',
+            'Eiger = lima_toolbox.camera.eiger:scan [eiger]',
         ],
     },
     extras_require=extras_require,
-    description="Lima CLI",
+    description="Lima toolbox",
     license="GPLv3+",
     long_description=description,
     long_description_content_type="text/markdown",
-    keywords="Lima, CLI, detector",
+    keywords="Lima, CLI, toolbox, detector",
     packages=find_packages(),
-    url="https://github.com/tiagocoutinho/lima-cli",
+    url="https://github.com/tiagocoutinho/lima-toolbox",
     version="0.1.0",
     python_requires=">=3.5"
 )

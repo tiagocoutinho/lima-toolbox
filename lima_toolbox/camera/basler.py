@@ -1,6 +1,6 @@
 import click
 
-from lima_cli.tool import camera, camera_module, url, table_style, max_width
+from lima_toolbox.tool import camera, camera_module, url, table_style, max_width
 
 
 @camera(name="basler")
