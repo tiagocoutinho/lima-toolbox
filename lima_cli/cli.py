@@ -32,7 +32,12 @@ def register_lima_camera_commands(group):
 @click.group('lima')
 @click.pass_context
 def cli(ctx):
-    """Lima CLI"""
+    """
+    Lima CLI
+
+    Detector discovery, detector information, perform acquisitions and custom
+    detector commands
+    """
     ctx.ensure_object(dict)
 
 
@@ -66,6 +71,7 @@ async def _scan(timeout):
 @table_style
 @max_width
 def scan(timeout, table_style, max_width):
+    """scan network for detectors"""
     tables, errors = asyncio.run(_scan(timeout))
     for name, table in tables:
         if len(table):

@@ -13,7 +13,7 @@ def basler(
     inter_packet_delay,
     frame_transmission_delay
 ):
-    """basler camera"""
+    """basler detector specific commands"""
     if url is None:
         return
     Basler = camera_module('Basler')
@@ -33,6 +33,7 @@ def scan(timeout=None):
 @table_style
 @max_width
 def basler_scan(table_style, max_width):
+    """show accessible basler detectors on the network"""
     table = scan()
     style = getattr(table, "STYLE_" + table_style.upper())
     table.set_style(style)

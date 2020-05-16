@@ -12,7 +12,7 @@ DEFAULT_HTTP_PORT = 8000
 @camera(name="eiger")
 @url
 def eiger(url):
-    """eiger camera"""
+    """eiger detector specific commands"""
     if url is None:
         return
     Eiger = camera_module('Eiger')
@@ -78,6 +78,7 @@ async def scan(port=DEFAULT_HTTP_PORT, timeout=2):
 @table_style
 @max_width
 def eiger_scan(port, timeout, table_style, max_width):
+    """show accessible eiger detectors on the network"""
     table = asyncio.run(scan(port, timeout))
     style = getattr(table, "STYLE_" + table_style.upper())
     table.set_style(style)
