@@ -27,17 +27,18 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'lima = lima_toolbox.cli:main'
+            'lima = Lima.toolbox.cli:main'
         ],
         'lima.cli.camera': [
-            'Basler = lima_toolbox.camera.basler:basler [basler]',
-            'Eiger = lima_toolbox.camera.eiger:eiger [eiger]',
+            'Basler = Lima.toolbox.camera.basler:basler [basler]',
+            'Eiger = Lima.toolbox.camera.eiger:eiger [eiger]',
         ],
         'lima.cli.camera.scan': [
-            'Basler = lima_toolbox.camera.basler:scan [basler]',
-            'Eiger = lima_toolbox.camera.eiger:scan [eiger]',
+            'Basler = Lima.toolbox.camera.basler:scan [basler]',
+            'Eiger = Lima.toolbox.camera.eiger:scan [eiger]',
         ],
     },
+    namespace_packages=['Lima'],
     extras_require=extras_require,
     description="Lima toolbox",
     license="GPLv3+",

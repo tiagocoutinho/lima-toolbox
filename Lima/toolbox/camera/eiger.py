@@ -3,8 +3,8 @@ import urllib.parse
 
 import click
 
-from lima_toolbox.tool import camera, camera_module, url, table_style, max_width
-from lima_toolbox.network import get_subnet_addresses, get_host_by_addr
+from Lima.toolbox.tool import camera, camera_module, url, table_style, max_width
+from Lima.toolbox.network import get_subnet_addresses, get_host_by_addr
 
 DEFAULT_HTTP_PORT = 8000
 
