@@ -2,7 +2,7 @@
 
 """The setup script."""
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 with open("README.md") as f:
     description = f.read()
@@ -38,14 +38,12 @@ setup(
             'Eiger = Lima.toolbox.camera.eiger:scan [eiger]',
         ],
     },
-    namespace_packages=['Lima'],
     extras_require=extras_require,
     description="Lima toolbox",
     license="GPLv3+",
     long_description=description,
     long_description_content_type="text/markdown",
     keywords="Lima, CLI, toolbox, detector",
-    packages=find_packages(),
     url="https://github.com/tiagocoutinho/lima-toolbox",
     version="0.0.1",
     python_requires=">=3.5"

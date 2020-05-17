@@ -9,7 +9,6 @@ __all__ = ['main']
 
 import asyncio
 import functools
-import pkg_resources
 
 import click
 
@@ -21,6 +20,7 @@ def register_lima_camera_commands(group):
     Return commands for those cameras who registered themselves
     with an entry point
     """
+    import pkg_resources
     for ep in pkg_resources.iter_entry_points('lima.cli.camera'):
         group.add_command(ep.load())
 
