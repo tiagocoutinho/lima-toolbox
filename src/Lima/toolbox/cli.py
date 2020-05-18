@@ -12,21 +12,44 @@ import functools
 
 import click
 
-from .tool import table_style, max_width
+from .util import scan
 
 
-def register_lima_camera_commands(group):
-    """
-    Return commands for those cameras who registered themselves
-    with an entry point
-    """
-    import pkg_resources
-    for ep in pkg_resources.iter_entry_points('lima.cli.camera'):
-        group.add_command(ep.load())
+url = click.option("-u", "--url", type=str)
 
-    group.scans = []
-    for ep in pkg_resources.iter_entry_points('lima.cli.camera.scan'):
-        group.scans.append((ep.name, ep.load()))
+
+table_style = click.option(
+    "--style", "table_style", type=str, default="compact",
+    show_default=True, help="table style"
+)
+
+
+max_width = click.option(
+    "--max-width",
+    type=int,
+    default=lambda: click.get_terminal_size()[0],
+    help="maximum width",
+)
+
+
+def camera(func=None, **attrs):
+    """Helper click group command decorator"""
+    if func is None:
+        return functools.partial(camera, **attrs)
+
+    @functools.wraps(func)
+    def decorator(ctx, *args, **kwargs):
+        ctx.obj['interface'] = func(*args, **kwargs)
+
+    group = click.group(**attrs)(click.pass_context(decorator))
+
+    from .info import info
+    from .acquire import acquire
+
+    group.add_command(info)
+    group.add_command(acquire)
+
+    return group
 
 
 @click.group('lima')
@@ -41,38 +64,13 @@ def cli(ctx):
     ctx.ensure_object(dict)
 
 
-async def _scan(timeout):
-    loop = asyncio.get_running_loop()
-
-    async def detector_scan(scan, name, timeout):
-        if asyncio.iscoroutinefunction(scan):
-            task = asyncio.create_task(scan(timeout=timeout))
-        else:
-            scan = functools.partial(scan, timeout=timeout)
-            task = loop.run_in_executor(None, scan)
-        return name, (await task)
-
-    tasks = []
-    for name, scan in cli.scans:
-        task = asyncio.create_task(detector_scan(scan, name, timeout=timeout))
-        tasks.append(task)
-
-    tables, errors = [], []
-    for future in asyncio.as_completed(tasks, timeout=timeout+0.1):
-        try:
-            tables.append(await future)
-        except Exception as error:
-            errors.append((name, error))
-    return tables, errors
-
-
 @cli.command("scan")
 @click.option('--timeout', default=2.0)
 @table_style
 @max_width
-def scan(timeout, table_style, max_width):
+def lima_scan(timeout, table_style, max_width):
     """scan network for detectors"""
-    tables, errors = asyncio.run(_scan(timeout))
+    tables, errors = asyncio.run(scan(cli.scans, timeout))
     for name, table in tables:
         if len(table):
             style = getattr(table, "STYLE_" + table_style.upper())
@@ -88,6 +86,20 @@ def scan(timeout, table_style, max_width):
             click.echo()
     for name, error in errors:
         click.echo('{} error: {!r}'.format(name, error), err=True)
+
+
+def register_lima_camera_commands(group):
+    """
+    Return commands for those cameras who registered themselves
+    with an entry point
+    """
+    import pkg_resources
+    for ep in pkg_resources.iter_entry_points('lima.cli.camera'):
+        group.add_command(ep.load())
+
+    group.scans = []
+    for ep in pkg_resources.iter_entry_points('lima.cli.camera.scan'):
+        group.scans.append((ep.name, ep.load()))
 
 
 def main():
