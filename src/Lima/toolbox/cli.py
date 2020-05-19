@@ -76,11 +76,6 @@ def lima_scan(timeout, table_style, max_width):
             style = getattr(table, "STYLE_" + table_style.upper())
             table.set_style(style)
             table.max_table_width = max_width
-            super_table = type(table)()
-            super_table.column_headers = [name]
-            super_table.append_row([table])
-            super_table.set_style(style)
-            super_table.max_table_width = max_width
             click.echo(name+":")
             click.echo(table)
             click.echo()
