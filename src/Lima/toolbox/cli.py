@@ -65,7 +65,7 @@ def cli(ctx):
 
 
 @cli.command("scan")
-@click.option('--timeout', default=2.0)
+@click.option('--timeout', default=3.0)
 @table_style
 @max_width
 def lima_scan(timeout, table_style, max_width):
