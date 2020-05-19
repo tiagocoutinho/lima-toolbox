@@ -9,7 +9,6 @@ from prompt_toolkit.shortcuts import ProgressBar
 
 import pint
 import Lima.Core
-import Lima.Eiger
 from Lima.Core import AcqRunning, AcqFault, FrameDim
 
 
