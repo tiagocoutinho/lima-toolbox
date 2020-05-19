@@ -195,24 +195,24 @@ def file_format(text):
 
 
 @click.command("acquire")
-@click.option('-n', '--nb-frames', default=10, type=int)
-@click.option('-e', '--exposure-time', default=0.1, type=float)
-@click.option('-l', '--latency-time', default=0.0, type=float)
-@click.option('-d', '--saving-directory', default=None, type=str)
+@click.option('-n', '--nb-frames', default=10, type=int, show_default=True)
+@click.option('-e', '--exposure-time', default=0.1, type=float, show_default=True)
+@click.option('-l', '--latency-time', default=0.0, type=float, show_default=True)
+@click.option('-d', '--saving-directory', default=None, type=str, show_default=True)
 @click.option(
     '-f', '--saving-format', default='EDF',
-    type=file_format, help='saving format')
-@click.option('-p', '--saving-prefix', default='image_', type=str)
-@click.option('-s', '--saving-suffix', default='__AUTO_SUFFIX__', type=str)
+    type=file_format, help='saving format', show_default=True)
+@click.option('-p', '--saving-prefix', default='image_', type=str, show_default=True)
+@click.option('-s', '--saving-suffix', default='__AUTO_SUFFIX__', type=str, show_default=True)
 @click.option(
-    '--frame-type', type=frame_type, default='Bpp16',
+    '--frame-type', type=frame_type, default='Bpp16', show_default=True,
     help='pixel format (ex: Bpp8) [default: Bpp16]')
-@click.option('--max-buffer-size', type=float, default=50,
-              help='maximum buffer size (%% total memory) [default: %(default)s %%]')
-@click.option('--nb-saving-tasks', type=int, default=1,
-              help='nb. of saving tasks [default: %(default)s]')
-@click.option('--nb-processing-tasks', type=int, default=2,
-              help='nb. of processing tasks [default: %(default)s]')
+@click.option('--max-buffer-size', type=float, default=50, show_default=True,
+              help='maximum buffer size (% total memory)')
+@click.option('--nb-saving-tasks', type=int, default=1, show_default=True,
+              help='nb. of saving tasks')
+@click.option('--nb-processing-tasks', type=int, default=2, show_default=True,
+              help='nb. of processing tasks')
 @click.option('--cleanup/--no-cleanup', default=False,
               help='do not cleanup saving directory')
 @click.pass_context
