@@ -29,6 +29,7 @@ setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     ],
     entry_points={
         "console_scripts": ["lima = Lima.toolbox.cli:main"],
@@ -44,7 +45,6 @@ setup(
     install_requires=install_requires,
     extras_require=extras_require,
     description="Lima toolbox",
-    license="GPLv3+",
     long_description=description,
     long_description_content_type="text/markdown",
     keywords="Lima, CLI, toolbox, detector",
