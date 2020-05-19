@@ -26,7 +26,7 @@ def eiger(url):
     return interface
 
 
-async def find_detectors(port=DEFAULT_HTTP_PORT, timeout=5):
+async def find_detectors(port=DEFAULT_HTTP_PORT, timeout=2):
     import aiohttp
 
     async def get(addr):
@@ -43,7 +43,8 @@ async def find_detectors(port=DEFAULT_HTTP_PORT, timeout=5):
             return host, port, version
 
     detectors = []
-    coros = [get(host) for host in get_subnet_addresses()]
+    addresses = get_subnet_addresses()
+    coros = [get(host) for host in addresses]
     try:
         for task in asyncio.as_completed(coros, timeout=timeout):
             detector = await task
