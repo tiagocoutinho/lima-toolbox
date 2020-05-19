@@ -3,8 +3,9 @@ import urllib.parse
 
 import click
 
-from lima_toolbox.tool import camera, camera_module, url, table_style, max_width
-from lima_toolbox.network import get_subnet_addresses, get_host_by_addr
+from Lima.toolbox.cli import camera, url, table_style, max_width
+from Lima.toolbox.util import camera_module
+from Lima.toolbox.network import get_subnet_addresses, get_host_by_addr
 
 DEFAULT_HTTP_PORT = 8000
 
@@ -25,7 +26,7 @@ def eiger(url):
     return interface
 
 
-async def find_detectors(port=DEFAULT_HTTP_PORT, timeout=5):
+async def find_detectors(port=DEFAULT_HTTP_PORT, timeout=2.0):
     import aiohttp
 
     async def get(addr):
@@ -42,7 +43,8 @@ async def find_detectors(port=DEFAULT_HTTP_PORT, timeout=5):
             return host, port, version
 
     detectors = []
-    coros = [get(host) for host in get_subnet_addresses()]
+    addresses = get_subnet_addresses()
+    coros = [get(host) for host in addresses]
     try:
         for task in asyncio.as_completed(coros, timeout=timeout):
             detector = await task
@@ -74,7 +76,7 @@ async def scan(port=DEFAULT_HTTP_PORT, timeout=2):
 
 @eiger.command("scan")
 @click.option('-p', '--port', default=DEFAULT_HTTP_PORT)
-@click.option('--timeout', default=2)
+@click.option('--timeout', default=2.0)
 @table_style
 @max_width
 def eiger_scan(port, timeout, table_style, max_width):

@@ -13,17 +13,19 @@ def get_ipv4_addresses():
 def get_subnet_addresses():
     domains = (addr.rsplit('.', 1)[0] for addr in get_ipv4_addresses()
                if not addr.startswith('127'))
+    addresses = set()
     for i in range(256):
         for domain in domains:
-            yield f"{domain}.{i}"
+            addresses.add(f"{domain}.{i}")
     for addr in get_ipv4_addresses():
         if addr.startswith('127'):
-            yield addr
+            addresses.add(addr)
         else:
             # assuming 255.255.255.0 netmask
             domain = addr.rsplit('.', 1)[0]
             for i in range(256):
-                yield f"{domain}.{i}"
+                addresses.add(f"{domain}.{i}")
+    return addresses
 
 
 async def get_host_by_addr(addr):
