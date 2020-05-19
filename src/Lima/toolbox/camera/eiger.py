@@ -26,7 +26,7 @@ def eiger(url):
     return interface
 
 
-async def find_detectors(port=DEFAULT_HTTP_PORT, timeout=2):
+async def find_detectors(port=DEFAULT_HTTP_PORT, timeout=2.0):
     import aiohttp
 
     async def get(addr):
@@ -76,7 +76,7 @@ async def scan(port=DEFAULT_HTTP_PORT, timeout=2):
 
 @eiger.command("scan")
 @click.option('-p', '--port', default=DEFAULT_HTTP_PORT)
-@click.option('--timeout', default=2)
+@click.option('--timeout', default=2.0)
 @table_style
 @max_width
 def eiger_scan(port, timeout, table_style, max_width):

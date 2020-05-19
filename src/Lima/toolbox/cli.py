@@ -19,7 +19,7 @@ url = click.option("-u", "--url", type=str)
 
 
 table_style = click.option(
-    "--style", "table_style", type=str, default="compact",
+    "--table-style", "table_style", type=str, default="compact",
     show_default=True, help="table style"
 )
 
@@ -65,7 +65,7 @@ def cli(ctx):
 
 
 @cli.command("scan")
-@click.option('--timeout', default=3.0)
+@click.option('--timeout', default=2.0)
 @table_style
 @max_width
 def lima_scan(timeout, table_style, max_width):
