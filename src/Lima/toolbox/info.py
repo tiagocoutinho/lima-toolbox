@@ -18,7 +18,7 @@ def info_list(info):
 
 def info_text(info):
     dinfo = info if isinstance(info, (list, tuple)) else info_list(info)
-    size = max(len(i) for i in dinfo[0])
+    size = max(len(i[0]) for i in dinfo)
     template = "{{:>{}}}: {{}}".format(size)
     lines = (template.format(key, value) for key, value in dinfo)
     return '\n'.join(lines)
