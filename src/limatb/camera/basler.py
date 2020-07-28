@@ -1,7 +1,7 @@
 import click
 
-from Lima.toolbox.cli import camera, url, table_style, max_width
-from Lima.toolbox.util import camera_module
+from limatb.cli import camera, url, table_style, max_width
+from limatb.util import camera_module
 
 @camera(name="basler")
 @url

@@ -52,7 +52,7 @@ def camera(func=None, **attrs):
     return group
 
 
-@click.group('lima')
+@click.group('limatb')
 @click.pass_context
 def cli(ctx):
     """
@@ -89,11 +89,11 @@ def register_lima_camera_commands(group):
     with an entry point
     """
     import pkg_resources
-    for ep in pkg_resources.iter_entry_points('lima.cli.camera'):
+    for ep in pkg_resources.iter_entry_points('limatb.cli.camera'):
         group.add_command(ep.load())
 
     group.scans = []
-    for ep in pkg_resources.iter_entry_points('lima.cli.camera.scan'):
+    for ep in pkg_resources.iter_entry_points('limatb.cli.camera.scan'):
         group.scans.append((ep.name, ep.load()))
 
 

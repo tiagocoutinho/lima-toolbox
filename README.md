@@ -5,20 +5,6 @@ development of [Lima](http://github.com/esrf-bliss/lima) cameras.
 
 ![Lima toolbox in action](doc/lima_toolbox.svg)
 
-## Disclaimer
-
-The current version depends on a version of Lima with the feature
-"Lima as namespace package" accepted. At the time of writing this doc
-it is still not the case
-(see [PR #116](https://github.com/esrf-bliss/Lima/pull/116)).
-
-If you still want to try it out you need to replace your Lima installation
-`Lima/__init__.py` file with one with the simple content:
-
-```python
-__path__ = __import__('pkgutil').extend_path(__path__, __name__)
-```
-
 ## Installation
 
 **TL;DR**
@@ -183,7 +169,7 @@ possible independently of the type of camera you are writing the plug-in for.
 Let's say you want to create a plugin for the
 [Simulator](http://github.com/esrf-bliss/lima-camera-simulator) camera.
 
-First,create a new file in `src/Lima/toolbox/camera` called `simulator.py`.
+First,create a new file in `src/limatb/camera` called `simulator.py`.
 The lima toolbox CLI uses the [click](https://click.palletsprojects.com) library
 to help create a powerful command line interface.
 
@@ -192,9 +178,9 @@ decorator (a `click.group` helper) and write a function which should return a
 `Lima.Interface` object:
 
 ```python
-# src/Lima/toolbox/camera/simulator.py
+# src/limatb/camera/simulator.py
 
-from Lima.toolbox.cli import camera
+from limatb.cli import camera
 from Lima.Simulator import Camera, Interface
 
 
@@ -205,8 +191,8 @@ def simulator():
     return interface
 ```
 
-The second and last thing to do is to register the new command in the lima toolbox
-setup.py like this:
+The second and last thing to do is to register the new command in the lima
+toolbox setup.py like this:
 
 ```python
 extras_require = {
@@ -218,7 +204,7 @@ setup(
     entry_points={
         "lima.cli.camera": [
             ...
-            "Simulator = Lima.toolbox.camera.simulator:simulator [simulator]"
+            "Simulator = limatb.camera.simulator:simulator [simulator]"
         ]
     }
 )
@@ -233,7 +219,7 @@ Congratulations! You are now ready to make a PR to this repo with your new camer
 Read further to find how to implement camera options, details about the camera
 decorator and how to implement your own camera specific sub-commands.
 
-Examples of existing cameras can be found in the `src/Lima/toolbox/camera` directory.
+Examples of existing cameras can be found in the `src/limatb/camera` directory.
 
 #### Custom options
 
@@ -298,7 +284,7 @@ setup(
     entry_points={
         "lima.cli.camera.scan": [
             ...
-            "Simulator = Lima.toolbox.camera.simulator:scan [simulator]"
+            "Simulator = limatb.camera.simulator:scan [simulator]"
         ]
     }
 )
@@ -324,8 +310,8 @@ An example of a project which following this phylosophy is the
 
 ### Provided inside lima toolbox
 
-* [Basler](src/Lima/toolbox/camera/basler.py)
-* [Eiger](src/Lima/toolbox/camera/eiger.py)
+* [Basler](src/limatb/camera/basler.py)
+* [Eiger](src/limatb/camera/eiger.py)
 
 ### Known third party cameras
 

@@ -32,14 +32,14 @@ setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     ],
     entry_points={
-        "console_scripts": ["lima = Lima.toolbox.cli:main"],
-        "lima.cli.camera": [
-            "Basler = Lima.toolbox.camera.basler:basler [basler]",
-            "Eiger = Lima.toolbox.camera.eiger:eiger [eiger]",
+        "console_scripts": ["limatb = limatb.cli:main"],
+        "limatb.cli.camera": [
+            "Basler = limatb.camera.basler:basler [basler]",
+            "Eiger = limatb.camera.eiger:eiger [eiger]",
         ],
-        "lima.cli.camera.scan": [
-            "Basler = Lima.toolbox.camera.basler:scan [basler]",
-            "Eiger = Lima.toolbox.camera.eiger:scan [eiger]",
+        "limatb.cli.camera.scan": [
+            "Basler = limatb.camera.basler:scan [basler]",
+            "Eiger = limatb.camera.eiger:scan [eiger]",
         ],
     },
     install_requires=install_requires,
