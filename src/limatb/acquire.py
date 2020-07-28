@@ -218,7 +218,8 @@ def file_format(text):
 def acquire(ctx, **kwargs):
     """Executes an acquisition"""
     interface = ctx.obj["interface"]
-
+    if interface is None:
+        raise click.UsageError("missing detector", ctx)
     class Options:
         def __init__(self, opts):
             self.__dict__.update(opts)
