@@ -135,7 +135,9 @@ def AcqProgBar(ctrl, options):
     exposure_time = options.exposure_time * ur.second
     acq_time = (options.nb_frames * exposure_time).to_compact()
     frame_rate = (1/exposure_time).to(ur.Hz).to_compact()
-    title = f'Acquiring on {info.getDetectorModel()} ({info.getDetectorType()}) | ' \
+    model = info.getDetectorModel()
+    dtype = info.getDetectorType()
+    title = f'Acquiring on {model} ({dtype}) | ' \
             f'{options.nb_frames} x {exposure_time:~.4}({frame_rate:~.4}) = {acq_time:~.4}  | ' \
             f'{frame_dim}'
     return ProgressBar(
@@ -235,8 +237,8 @@ def acquire(ctx, **kwargs):
             with ReportTask('Preparing'):
                 acq_ctx.prepareAcq()
             with ReportTask('Acquiring', end='\n'):
-                acq_ctx.startAcq()
                 with AcqProgBar(ctrl, options) as prog_bar:
+                    acq_ctx.startAcq()
                     monitor = AcquisitionMonitor(acq_ctx, prog_bar, options)
                     monitor.run()
     except KeyboardInterrupt:
