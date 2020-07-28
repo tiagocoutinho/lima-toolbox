@@ -118,6 +118,7 @@ def configure(ctrl, options):
         saving.setDirectory(options.saving_directory)
     acq.setAcqExpoTime(options.exposure_time)
     acq.setAcqNbFrames(options.nb_frames)
+    acq.setTriggerMode(options.trigger)
     buff.setMaxMemory(options.max_buffer_size)
 
 
@@ -195,10 +196,17 @@ def file_format(text):
     return getattr(Lima.Core.CtSaving, text)
 
 
+def trigger_mode(text):
+    return getattr(Lima.Core, text)
+
+
 @click.command("acquire")
 @click.option('-n', '--nb-frames', default=10, type=int, show_default=True)
 @click.option('-e', '--exposure-time', default=0.1, type=float, show_default=True)
 @click.option('-l', '--latency-time', default=0.0, type=float, show_default=True)
+@click.option(
+    '-t', '--trigger', default='IntTrig', type=trigger_mode, show_default=True,
+    help='trigger type (ex: ExtTrigMulti)')
 @click.option('-d', '--saving-directory', default=None, type=str, show_default=True)
 @click.option(
     '-f', '--saving-format', default='EDF',
@@ -207,7 +215,7 @@ def file_format(text):
 @click.option('-s', '--saving-suffix', default='__AUTO_SUFFIX__', type=str, show_default=True)
 @click.option(
     '--frame-type', type=frame_type, default='Bpp16', show_default=True,
-    help='pixel format (ex: Bpp8) [default: Bpp16]')
+    help='pixel format (ex: Bpp8)')
 @click.option('--max-buffer-size', type=float, default=50, show_default=True,
               help='maximum buffer size (% total memory)')
 @click.option('--nb-saving-tasks', type=int, default=1, show_default=True,
