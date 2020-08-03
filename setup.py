@@ -8,7 +8,7 @@ from setuptools import setup
 with open("README.md") as f:
     description = f.read()
 
-install_requires = ["pint", "netifaces"]
+install_requires = ["click", "pint", "netifaces"]
 
 extras_require = {
     "basler": ["pylonctl"],
