@@ -8,11 +8,15 @@
 __all__ = ['main']
 
 import asyncio
+import logging
 import functools
 
 import click
 
 from .util import scan
+
+
+log = logging.getLogger("limatb")
 
 
 url = click.option("-u", "--url", type=str)
@@ -56,7 +60,7 @@ def camera(func=None, **attrs):
 @click.pass_context
 def cli(ctx):
     """
-    Lima CLI
+    Lima toolbox CLI
 
     Detector discovery, detector information, perform acquisitions and custom
     detector commands
@@ -90,11 +94,17 @@ def register_lima_camera_commands(group):
     """
     import pkg_resources
     for ep in pkg_resources.iter_entry_points('limatb.cli.camera'):
-        group.add_command(ep.load())
+        try:
+            group.add_command(ep.load())
+        except Exception as error:
+            log.debug('failed to register camera %s: %r', ep.name, error)
 
     group.scans = []
     for ep in pkg_resources.iter_entry_points('limatb.cli.camera.scan'):
-        group.scans.append((ep.name, ep.load()))
+        try:
+            group.scans.append((ep.name, ep.load()))
+        except Exception as error:
+            log.debug('failed to register scan %s: %r', ep.name, error)
 
 
 def main():
