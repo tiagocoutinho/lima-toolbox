@@ -36,21 +36,21 @@ Probably the most useful tool is the CLI. You can use it to discover cameras
 on the network, display information about a specfic camera and even perform
 acquisitions.
 
-The lima CLI provides global commands like `scan` which are not camera specific.
+The limatb CLI provides global commands like `scan` which are not camera specific.
 In addtition, each camera provides its own set of sub-commands. They are accessible
 by typing `lima <camera> <sub-command>` (ex: `lima eiger --host=bl99eiger info`).
 
-Typing ```lima --help``` will display help. Help is context sensitive, so
-typing ```lima basler --help``` will display help for the basler subset of
+Typing ```limatb --help``` will display help. Help is context sensitive, so
+typing ```limatb basler --help``` will display help for the basler subset of
 commands.
 
 ### camera discovery
 
-camera toolbox plug-ins which provide *scan* capability allow you to
+camera toolbox plug-ins which provides *scan* capability allow you to
 discover them by using the `scan` command:
 
 ```console
-$ lima scan --table-style=box_rounded
+$ limatb scan --table-style=box_rounded
 
 Basler:
 ╭──────────────┬──────────────────────────────┬───────────────────────┬───────────┬────────────┬───────────┬────────╮
@@ -104,7 +104,7 @@ Basic information about a camera can be retrieved with the `info` sub-command.
 Examples:
 
 ```console
-$ lima eiger --url=bl04eiger info
+$ limatb eiger --url=bl04eiger info
     CurrImageType: 10
      DefImageType: 10
 DetectorImageSize: <3110x3269>
@@ -115,7 +115,7 @@ DetectorImageSize: <3110x3269>
         PixelSize: (7.5e-05, 7.5e-05)
  UserDetectorName: E-18-0102
 
-$ lima mythensls --url bl04mythen info
+$ limatb mythensls --url bl04mythen info
       CurrImageType   10
        DefImageType   10
   DetectorImageSize   <7680x1>
@@ -169,13 +169,13 @@ possible independently of the type of camera you are writing the plug-in for.
 Let's say you want to create a plugin for the
 [Simulator](http://github.com/esrf-bliss/lima-camera-simulator) camera.
 
-First,create a new file in `src/limatb/camera` called `simulator.py`.
+First, create a new file in `src/limatb/camera` called `simulator.py`.
 The lima toolbox CLI uses the [click](https://click.palletsprojects.com) library
 to help create a powerful command line interface.
 
 To create a `simulator` sub-command you can simply use the lima toolbox `camera`
-decorator (a `click.group` helper) and write a function which should return a
-`Lima.Interface` object:
+decorator (which is a `click.group` helper) and write a function that should
+return a `Lima.Interface` object:
 
 ```python
 # src/limatb/camera/simulator.py
@@ -258,10 +258,10 @@ Here is an example on how to implement a specific sub-command:
 ```python
 
 @simulator.command("initialize")
-def initialize(self):
+@click.pass_context
+def initialize(ctx):
     # Initialization code here
-    ...
-
+    interface = ctx.obj['interface']
 ```
 
 ### scan command
@@ -290,10 +290,11 @@ setup(
 )
 ```
 
-The scan function can have any name you which. If you provide a coroutine
-(with `async` keyword) the lima t
+The scan function can have any name you which. You can provide a coroutine
+(with `async` keyword).
 
-If now you type `lima scan` on the command line, the cameras
+If now you type `lima scan` on the command line, it should execute the
+scan command of all registered cameras.
 
 
 ### 2. Write a Lima-toolbox entry point in an external project
