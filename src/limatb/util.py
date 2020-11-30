@@ -65,8 +65,5 @@ async def scan(scans, timeout):
         try:
             tables.append(await future)
         except Exception as error:
-            errors.append((name, error))
+            errors.append(error)
     return tables, errors
-
-
-

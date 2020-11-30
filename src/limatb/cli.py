@@ -83,8 +83,8 @@ def lima_scan(timeout, table_style, max_width):
             click.echo(name+":")
             click.echo(table)
             click.echo()
-    for name, error in errors:
-        click.echo('{} error: {!r}'.format(name, error), err=True)
+    for error in errors:
+        click.echo('error: {!r}'.format(error), err=True)
 
 
 def register_lima_camera_commands(group):
