@@ -117,6 +117,7 @@ def configure(ctrl, options):
         saving.setSavingMode(saving.AutoFrame)
         saving.setDirectory(options.saving_directory)
     acq.setAcqExpoTime(options.exposure_time)
+    acq.setLatencyTime(options.latency_time)
     acq.setAcqNbFrames(options.nb_frames)
     acq.setTriggerMode(options.trigger)
     buff.setMaxMemory(options.max_buffer_size)
@@ -134,12 +135,18 @@ def AcqProgBar(ctrl, options):
     info = iface.getHwCtrlObj(Lima.Core.HwCap.DetInfo)
     frame_dim = FrameDim(info.getDetectorImageSize(), info.getCurrImageType())
     exposure_time = options.exposure_time * ur.second
-    acq_time = (options.nb_frames * exposure_time).to_compact()
-    frame_rate = (1/exposure_time).to(ur.Hz).to_compact()
+    latency_time = options.latency_time * ur.second
+    frame_time = exposure_time + latency_time
+    acq_time = (options.nb_frames * frame_time).to_compact()
+    frame_rate = (1/frame_time).to(ur.Hz).to_compact()
     model = info.getDetectorModel()
     dtype = info.getDetectorType()
+    if latency_time > 0:
+        frame_time_str = f'({exposure_time:~.4} + {latency_time:~.4})'
+    else:
+        frame_time_str = f'{exposure_time:~.4}'
     title = f'Acquiring on {model} ({dtype}) | ' \
-            f'{options.nb_frames} x {exposure_time:~.4}({frame_rate:~.4}) = {acq_time:~.4}  | ' \
+            f'{options.nb_frames} x {frame_time_str}({frame_rate:~.4}) = {acq_time:~.4}  | ' \
             f'{frame_dim}'
     return ProgressBar(
         title=title,
