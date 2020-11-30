@@ -39,7 +39,13 @@ async def find_detectors(port=DEFAULT_HTTP_PORT, timeout=2.0):
                 version = (await r.json())['value']
             except Exception:
                 return
-            host = await get_host_by_addr(addr)
+            try:
+                host = await get_host_by_addr(addr)
+            except:
+                class host:
+                    name = addr
+                    aliases = []
+                    addresses = [addr]
             return host, port, version
 
     detectors = []
@@ -57,15 +63,13 @@ async def find_detectors(port=DEFAULT_HTTP_PORT, timeout=2.0):
 
 def detector_table(detectors):
     import beautifultable
-
-    width = click.get_terminal_size()[0]
-    table = beautifultable.BeautifulTable(max_width=width)
-    table.column_headers = 'Host', 'Alias(es)', 'Address(es)', 'Port', 'API'
+    table = beautifultable.BeautifulTable()
+    table.columns.header = 'Host', 'Alias(es)', 'Address(es)', 'Port', 'API'
     for detector in detectors:
         host, port, version = detector
         aliases = '\n'.join(host.aliases)
         addresses = '\n'.join(host.addresses)
-        table.append_row((host.name, aliases, addresses, port, version))
+        table.rows.append((host.name, aliases, addresses, port, version))
     return table
 
 
@@ -84,5 +88,5 @@ def eiger_scan(port, timeout, table_style, max_width):
     table = asyncio.run(scan(port, timeout))
     style = getattr(table, "STYLE_" + table_style.upper())
     table.set_style(style)
-    table.max_table_width = max_width
+    table.maxwidth = max_width
     click.echo(table)

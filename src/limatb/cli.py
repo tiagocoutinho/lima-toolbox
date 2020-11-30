@@ -76,10 +76,10 @@ def lima_scan(timeout, table_style, max_width):
     """scan network for detectors"""
     tables, errors = asyncio.run(scan(cli.scans, timeout))
     for name, table in tables:
-        if len(table):
+        if len(table.rows):
             style = getattr(table, "STYLE_" + table_style.upper())
             table.set_style(style)
-            table.max_table_width = max_width
+            table.maxwidth = max_width
             click.echo(name+":")
             click.echo(table)
             click.echo()
