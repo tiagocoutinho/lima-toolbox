@@ -8,11 +8,11 @@ from setuptools import setup
 with open("README.md") as f:
     description = f.read()
 
-install_requires = ["click", "pint", "netifaces", "beautifultable>=1"]
+install_requires = ["click", "pint", "aiodns", "netifaces", "beautifultable>=1"]
 
 extras_require = {
     "basler": ["pylonctl"],
-    "eiger": ["aiohttp", "aiodns"]
+    "eiger": ["aiohttp"]
 }
 extras_require["all"] = install_requires + list(
     set.union(*(set(i) for i in extras_require.values()))
