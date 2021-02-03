@@ -1,11 +1,14 @@
 import os
 import glob
 import time
+import signal
 import pathlib
 
 import click
+from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit import print_formatted_text, HTML
 from prompt_toolkit.shortcuts import ProgressBar
+from prompt_toolkit.patch_stdout import patch_stdout
 
 import pint
 import Lima.Core
@@ -181,7 +184,7 @@ def cleanup(ctrl, options):
         os.remove(filename)
 
 
-def AcqProgBar(ctrl, options):
+def AcqProgBar(ctrl, options, **kwargs):
     iface = ctrl.hwInterface()
     info = iface.getHwCtrlObj(Lima.Core.HwCap.DetInfo)
     frame_dim = FrameDim(info.getDetectorImageSize(), info.getCurrImageType())
@@ -199,10 +202,8 @@ def AcqProgBar(ctrl, options):
     title = f'Acquiring on {model} ({dtype}) | ' \
             f'{options.nb_frames} x {frame_time_str}({frame_rate:~.4}) = {acq_time:~.4}  | ' \
             f'{frame_dim}'
-    return ProgressBar(
-        title=title,
-        bottom_toolbar=HTML(" <b>[Control-C]</b> abort")
-    )
+    kwargs["title"] = title
+    return ProgressBar(**kwargs)
 
 
 class AcquisitionMonitor:
@@ -298,6 +299,22 @@ def acquire(ctx, **kwargs):
 
     options = Options(kwargs)
 
+    kb = KeyBindings()
+
+    @kb.add('x')
+    def _(event):
+        " Send Abort (control-c) signal. "
+        os.kill(os.getpid(), signal.SIGINT)
+
+    tb_message = " <b>[x]</b> abort"
+
+    if options.trigger == "int-mult":
+        tb_message += " | <b>[t]</b> trigger"
+
+        @kb.add('t')
+        def _(event):
+            acq_ctx.startAcq()
+
     with ReportTask('Initializing'):
         ctrl = Lima.Core.CtControl(interface)
     with ReportTask('Configuring'):
@@ -307,12 +324,16 @@ def acquire(ctx, **kwargs):
             with ReportTask('Preparing'):
                 acq_ctx.prepareAcq()
             with ReportTask('Acquiring', end='\n'):
-                with AcqProgBar(ctrl, options) as prog_bar:
+                prog_bar = AcqProgBar(ctrl, options, 
+                    bottom_toolbar=HTML(tb_message), 
+                    key_bindings=kb,
+                )
+                with prog_bar:
                     acq_ctx.startAcq()
                     monitor = AcquisitionMonitor(acq_ctx, prog_bar, options)
                     monitor.run()
     except KeyboardInterrupt:
-        pass
+        print("Ctrl-C pressed")
     finally:
         with ReportTask('Cleaning up') as task:
             if options.cleanup and options.saving_directory:
