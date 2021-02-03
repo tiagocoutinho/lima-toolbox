@@ -28,6 +28,51 @@ ErrorMap = {
     Lima.Core.CtControl.CameraError:       "Camera Error",
 }
 
+# Map all <Enums name: (Label, Suffix)>
+AllFileFormats = {
+    "HARDWARE_SPECIFIC": ("HARDWARE", ""),
+    "RAW": ("RAW", ".raw"),
+    "EDF": ("EDF", ".edf"),
+    "CBFFormat": ("CBF", ".cbf"),
+    "NXS": ("NXS", ".nxs"),
+    "FITS": ("FITS", ".fits"),
+    "EDFGZ": ("EDFGZ", ".edfgz"),
+    "TIFFFormat": ("TIFF", ".tiff"),
+    "HDF5": ("HDF5", ".h5"),
+    "EDFConcat": ("EDFConcat", ".edf"),
+    "EDFLZ4": ("EDFLZ4", ".edflz4"),
+    "CBFMiniHeader": ("CBFMiniHeader", ".cbf"),
+    "HDF5GZ": ("HDF5GZ", ".h5"),
+    "HDF5BS": ("HDF5BS", ".h5")
+}
+
+# We do this because not all lima versions support the same saving formats
+FileFormat = {
+    label: (getattr(Lima.Core.CtSaving, name), ext)
+    for name, (label, ext) in AllFileFormats.items()
+    if hasattr(Lima.Core.CtSaving, name)
+}
+
+
+SavingPolicy = {
+    "abort": Lima.Core.CtSaving.Abort,
+    "overwrite": Lima.Core.CtSaving.Overwrite,
+    "append": Lima.Core.CtSaving.Append
+}
+if hasattr(Lima.Core.CtSaving, "MultiSet"):
+    SavingPolicy["multiset"] = Lima.Core.CtSaving.MultiSet
+
+
+TriggerMode = {
+    "int": Lima.Core.IntTrig,
+    "int-mult": Lima.Core.IntTrigMult,
+    "ext-single": Lima.Core.ExtTrigSingle,
+    "ext-mult": Lima.Core.ExtTrigMult,
+    "ext-gate": Lima.Core.ExtGate,
+    "ext-start-stop": Lima.Core.ExtStartStop,
+    "ext-readout": Lima.Core.ExtTrigReadout
+}
+
 
 class ReportTask:
     DONE = '[<green>DONE</green>]'
@@ -109,17 +154,23 @@ def configure(ctrl, options):
     acq = ctrl.acquisition()
     saving = ctrl.saving()
     buff = ctrl.buffer()
-    saving.setFormat(options.saving_format)
-    saving.setPrefix(options.saving_prefix)
-    saving.setSuffix(options.saving_suffix)
-    saving.setMaxConcurrentWritingTask(options.nb_saving_tasks)
     if options.saving_directory:
+        fmt, ext = FileFormat[options.saving_format.upper()]
+        suffix = options.saving_suffix
+        if suffix == AUTO_SUFFIX:
+            suffix = ext
+        policy = SavingPolicy[options.saving_policy]
+        saving.setFormat(fmt)
+        saving.setPrefix(options.saving_prefix)
+        saving.setSuffix(suffix)
+        saving.setOverwritePolicy(policy)
+        saving.setMaxConcurrentWritingTask(options.nb_saving_tasks)
         saving.setSavingMode(saving.AutoFrame)
         saving.setDirectory(options.saving_directory)
     acq.setAcqExpoTime(options.exposure_time)
     acq.setLatencyTime(options.latency_time)
     acq.setAcqNbFrames(options.nb_frames)
-    acq.setTriggerMode(options.trigger)
+    acq.setTriggerMode(TriggerMode[options.trigger])
     buff.setMaxMemory(options.max_buffer_size)
 
 
@@ -199,12 +250,7 @@ def frame_type(text):
     return getattr(Lima.Core, text.capitalize())
 
 
-def file_format(text):
-    return getattr(Lima.Core.CtSaving, text)
-
-
-def trigger_mode(text):
-    return getattr(Lima.Core, text)
+AUTO_SUFFIX = '__AUTO_SUFFIX__'
 
 
 @click.command("acquire")
@@ -212,14 +258,23 @@ def trigger_mode(text):
 @click.option('-e', '--exposure-time', default=0.1, type=float, show_default=True)
 @click.option('-l', '--latency-time', default=0.0, type=float, show_default=True)
 @click.option(
-    '-t', '--trigger', default='IntTrig', type=trigger_mode, show_default=True,
-    help='trigger type (ex: ExtTrigMulti)')
+    '-t', '--trigger', default='int', show_default=True,
+    type=click.Choice(TriggerMode, case_sensitive=False),
+    help='trigger type'
+)
 @click.option('-d', '--saving-directory', default=None, type=str, show_default=True)
 @click.option(
     '-f', '--saving-format', default='EDF',
-    type=file_format, help='saving format', show_default=True)
+    type=click.Choice(FileFormat, case_sensitive=False),
+    help='saving format', show_default=True
+)
+@click.option(
+    '-p', '--saving-policy', default='abort',
+    type=click.Choice(SavingPolicy, case_sensitive=False),
+    help='saving policy', show_default=True
+)
 @click.option('-p', '--saving-prefix', default='image_', type=str, show_default=True)
-@click.option('-s', '--saving-suffix', default='__AUTO_SUFFIX__', type=str, show_default=True)
+@click.option('-s', '--saving-suffix', default=AUTO_SUFFIX, type=str, show_default=True)
 @click.option(
     '--frame-type', type=frame_type, default='Bpp16', show_default=True,
     help='pixel format (ex: Bpp8)')
