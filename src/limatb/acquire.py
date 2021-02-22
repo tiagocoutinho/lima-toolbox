@@ -31,29 +31,22 @@ ErrorMap = {
     Lima.Core.CtControl.CameraError:       "Camera Error",
 }
 
-# Map all <Enums name: (Label, Suffix)>
-AllFileFormats = {
-    "HARDWARE_SPECIFIC": ("HARDWARE", ""),
-    "RAW": ("RAW", ".raw"),
-    "EDF": ("EDF", ".edf"),
-    "CBFFormat": ("CBF", ".cbf"),
-    "NXS": ("NXS", ".nxs"),
-    "FITS": ("FITS", ".fits"),
-    "EDFGZ": ("EDFGZ", ".edfgz"),
-    "TIFFFormat": ("TIFF", ".tiff"),
-    "HDF5": ("HDF5", ".h5"),
-    "EDFConcat": ("EDFConcat", ".edf"),
-    "EDFLZ4": ("EDFLZ4", ".edflz4"),
-    "CBFMiniHeader": ("CBFMiniHeader", ".cbf"),
-    "HDF5GZ": ("HDF5GZ", ".h5"),
-    "HDF5BS": ("HDF5BS", ".h5")
-}
 
-# We do this because not all lima versions support the same saving formats
 FileFormat = {
-    label: (getattr(Lima.Core.CtSaving, name), ext)
-    for name, (label, ext) in AllFileFormats.items()
-    if hasattr(Lima.Core.CtSaving, name)
+    "hardware": Lima.Core.CtSaving.HARDWARE_SPECIFIC,
+    "raw": Lima.Core.CtSaving.RAW,
+    "edf": Lima.Core.CtSaving.EDF,
+    "edf-gz": Lima.Core.CtSaving.EDFGZ,
+    "edf-lz4": Lima.Core.CtSaving.EDFLZ4,
+    "edf-concat": Lima.Core.CtSaving.EDFConcat,
+    "cbf": Lima.Core.CtSaving.CBFFormat,
+    "cbf-mh": Lima.Core.CtSaving.CBFMiniHeader,
+    "nxs": Lima.Core.CtSaving.NXS,
+    "fits": Lima.Core.CtSaving.FITS,
+    "tiff": Lima.Core.CtSaving.TIFFFormat,
+    "hdf5": Lima.Core.CtSaving.HDF5,
+    "hdf5-gz": Lima.Core.CtSaving.HDF5GZ,
+    "hdf5-bs": Lima.Core.CtSaving.HDF5BS,
 }
 
 
@@ -64,6 +57,21 @@ SavingPolicy = {
 }
 if hasattr(Lima.Core.CtSaving, "MultiSet"):
     SavingPolicy["multiset"] = Lima.Core.CtSaving.MultiSet
+
+
+SavingMode = {
+    "manual": Lima.Core.CtSaving.Manual,
+    "auto-frame": Lima.Core.CtSaving.AutoFrame,
+    "auto-header": Lima.Core.CtSaving.AutoHeader
+}
+
+
+SavingManagedMode = {
+    "software": Lima.Core.CtSaving.Software,
+    "hardware": Lima.Core.CtSaving.Hardware
+}
+if hasattr(Lima.Core.CtSaving, "Camera"):
+    SavingPolicy["camera"] = Lima.Core.CtSaving.Camera
 
 
 TriggerMode = {
@@ -158,22 +166,27 @@ def configure(ctrl, options):
     saving = ctrl.saving()
     buff = ctrl.buffer()
     if options.saving_directory:
-        fmt, ext = FileFormat[options.saving_format.upper()]
+        fmt = FileFormat[options.saving_format.lower()]
         suffix = options.saving_suffix
-        if suffix == AUTO_SUFFIX:
-            suffix = ext
-        policy = SavingPolicy[options.saving_policy]
+        mode = SavingMode[options.saving_mode.lower()]
+        managed_mode = SavingManagedMode[options.saving_managed_mode.lower()]
+        policy = SavingPolicy[options.saving_policy.lower()]
         saving.setFormat(fmt)
+        if suffix == AUTO_SUFFIX:
+            saving.setFormatSuffix()
+        else:
+            saving.setSuffix(suffix)
         saving.setPrefix(options.saving_prefix)
-        saving.setSuffix(suffix)
         saving.setOverwritePolicy(policy)
         saving.setMaxConcurrentWritingTask(options.nb_saving_tasks)
-        saving.setSavingMode(saving.AutoFrame)
+        saving.setSavingMode(mode)
+        saving.setManagedMode(managed_mode)
         saving.setDirectory(options.saving_directory)
+        saving.setFramesPerFile(options.saving_nb_frames_per_file)
     acq.setAcqExpoTime(options.exposure_time)
     acq.setLatencyTime(options.latency_time)
     acq.setAcqNbFrames(options.nb_frames)
-    acq.setTriggerMode(TriggerMode[options.trigger])
+    acq.setTriggerMode(TriggerMode[options.trigger.lower()])
     buff.setMaxMemory(options.max_buffer_size)
 
 
@@ -274,6 +287,20 @@ AUTO_SUFFIX = '__AUTO_SUFFIX__'
     type=click.Choice(SavingPolicy, case_sensitive=False),
     help='saving policy', show_default=True
 )
+@click.option(
+    '--saving-managed-mode', default="software",
+    type=click.Choice(SavingManagedMode, case_sensitive=False),
+    help='saving managed mode', show_default=True
+)
+@click.option(
+    '--saving-nb-frames-per-file', default=1,
+    help="nb of frames per file"
+)
+@click.option(
+    '--saving-mode', default="auto-frame",
+    type=click.Choice(SavingMode, case_sensitive=False),
+    help="saving mode"
+)
 @click.option('-p', '--saving-prefix', default='image_', type=str, show_default=True)
 @click.option('-s', '--saving-suffix', default=AUTO_SUFFIX, type=str, show_default=True)
 @click.option(
@@ -315,6 +342,13 @@ def acquire(ctx, **kwargs):
         def _(event):
             acq_ctx.startAcq()
 
+    if options.saving_directory and options.saving_mode.lower() == "manual":
+        tb_message += " | <b>[s]</b> save last frame"
+
+        @kb.add('s')
+        def _(event):
+            ctrl.saving().writeFrame()
+
     with ReportTask('Initializing'):
         ctrl = Lima.Core.CtControl(interface)
     with ReportTask('Configuring'):
@@ -324,8 +358,8 @@ def acquire(ctx, **kwargs):
             with ReportTask('Preparing'):
                 acq_ctx.prepareAcq()
             with ReportTask('Acquiring', end='\n'):
-                prog_bar = AcqProgBar(ctrl, options, 
-                    bottom_toolbar=HTML(tb_message), 
+                prog_bar = AcqProgBar(ctrl, options,
+                    bottom_toolbar=HTML(tb_message),
                     key_bindings=kb,
                 )
                 with prog_bar:
