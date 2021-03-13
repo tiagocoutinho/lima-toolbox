@@ -197,7 +197,7 @@ def cleanup(ctrl, options):
         os.remove(filename)
 
 
-def AcqProgBar(ctrl, options, **kwargs):
+def AcquisitionProgressBar(ctrl, options, **kwargs):
     iface = ctrl.hwInterface()
     info = iface.getHwCtrlObj(Lima.Core.HwCap.DetInfo)
     frame_dim = FrameDim(info.getDetectorImageSize(), info.getCurrImageType())
@@ -358,7 +358,7 @@ def acquire(ctx, **kwargs):
             with ReportTask('Preparing'):
                 acq_ctx.prepareAcq()
             with ReportTask('Acquiring', end='\n'):
-                prog_bar = AcqProgBar(ctrl, options,
+                prog_bar = AcquisitionProgressBar(ctrl, options,
                     bottom_toolbar=HTML(tb_message),
                     key_bindings=kb,
                 )
