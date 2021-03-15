@@ -116,6 +116,9 @@ def configure(ctrl, options):
         saving.setManagedMode(managed_mode)
         saving.setDirectory(options.saving_directory)
         saving.setFramesPerFile(options.saving_nb_frames_per_file)
+    if options.saving_statistics_history_size:
+        saving.setEnableLogStat(True)
+        saving.setStatisticHistorySize(options.saving_statistics_history_size)
     acq.setAcqExpoTime(options.exposure_time)
     acq.setLatencyTime(options.latency_time)
     acq.setAcqNbFrames(options.nb_frames)
@@ -236,6 +239,7 @@ AUTO_SUFFIX = '__AUTO_SUFFIX__'
 )
 @click.option('-p', '--saving-prefix', default='image_', type=str, show_default=True)
 @click.option('-s', '--saving-suffix', default=AUTO_SUFFIX, type=str, show_default=True)
+@click.option('--saving-statistics-history-size', default=0, type=int, show_default=True)
 @click.option(
     '--frame-type', type=frame_type, default='Bpp16', show_default=True,
     help='pixel format (ex: Bpp8)')
