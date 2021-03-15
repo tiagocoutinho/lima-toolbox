@@ -3,9 +3,80 @@ import asyncio
 import pathlib
 import functools
 
-import Lima
+import pint
 import click
+import Lima.Core
+from Lima.Core import CtControl, CtSaving
 
+
+ur = pint.UnitRegistry()
+
+
+ErrorMap = {
+    CtControl.NoError:           "No error",
+    CtControl.SaveUnknownError:  "Saving error",
+    CtControl.SaveOpenError:     "Save file open error",
+    CtControl.SaveCloseError:    "Save file close error",
+    CtControl.SaveAccessError:   "Save access error",
+    CtControl.SaveOverwriteError: "Save overwrite error",
+    CtControl.SaveDiskFull:      "Save disk full",
+    CtControl.SaveOverun:        "Save overrun",
+    CtControl.ProcessingOverun:  "Soft Processing overrun",
+    CtControl.CameraError:       "Camera Error",
+}
+
+
+FileFormat = {
+    "hardware": CtSaving.HARDWARE_SPECIFIC,
+    "raw": CtSaving.RAW,
+    "edf": CtSaving.EDF,
+    "edf-gz": CtSaving.EDFGZ,
+    "edf-lz4": CtSaving.EDFLZ4,
+    "edf-concat": CtSaving.EDFConcat,
+    "cbf": CtSaving.CBFFormat,
+    "cbf-mh": CtSaving.CBFMiniHeader,
+    "nxs": CtSaving.NXS,
+    "fits": CtSaving.FITS,
+    "tiff": CtSaving.TIFFFormat,
+    "hdf5": CtSaving.HDF5,
+    "hdf5-gz": CtSaving.HDF5GZ,
+    "hdf5-bs": CtSaving.HDF5BS,
+}
+
+
+SavingPolicy = {
+    "abort": CtSaving.Abort,
+    "overwrite": CtSaving.Overwrite,
+    "append": CtSaving.Append
+}
+if hasattr(CtSaving, "MultiSet"):
+    SavingPolicy["multiset"] = CtSaving.MultiSet
+
+
+SavingMode = {
+    "manual": CtSaving.Manual,
+    "auto-frame": CtSaving.AutoFrame,
+    "auto-header": CtSaving.AutoHeader
+}
+
+
+SavingManagedMode = {
+    "software": CtSaving.Software,
+    "hardware": CtSaving.Hardware
+}
+if hasattr(CtSaving, "Camera"):
+    SavingPolicy["camera"] = CtSaving.Camera
+
+
+TriggerMode = {
+    "int": Lima.Core.IntTrig,
+    "int-mult": Lima.Core.IntTrigMult,
+    "ext-single": Lima.Core.ExtTrigSingle,
+    "ext-mult": Lima.Core.ExtTrigMult,
+    "ext-gate": Lima.Core.ExtGate,
+    "ext-start-stop": Lima.Core.ExtStartStop,
+    "ext-readout": Lima.Core.ExtTrigReadout
+}
 
 # ModuleNotFoundError added in python 3.6
 try:

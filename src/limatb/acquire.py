@@ -8,81 +8,14 @@ import click
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit import print_formatted_text, HTML
 from prompt_toolkit.shortcuts import ProgressBar
-from prompt_toolkit.patch_stdout import patch_stdout
 
-import pint
 import Lima.Core
 from Lima.Core import AcqRunning, AcqFault, FrameDim
 
-
-ur = pint.UnitRegistry()
-
-
-ErrorMap = {
-    Lima.Core.CtControl.NoError:           "No error",
-    Lima.Core.CtControl.SaveUnknownError:  "Saving error",
-    Lima.Core.CtControl.SaveOpenError:     "Save file open error",
-    Lima.Core.CtControl.SaveCloseError:    "Save file close error",
-    Lima.Core.CtControl.SaveAccessError:   "Save access error",
-    Lima.Core.CtControl.SaveOverwriteError: "Save overwrite error",
-    Lima.Core.CtControl.SaveDiskFull:      "Save disk full",
-    Lima.Core.CtControl.SaveOverun:        "Save overrun",
-    Lima.Core.CtControl.ProcessingOverun:  "Soft Processing overrun",
-    Lima.Core.CtControl.CameraError:       "Camera Error",
-}
-
-
-FileFormat = {
-    "hardware": Lima.Core.CtSaving.HARDWARE_SPECIFIC,
-    "raw": Lima.Core.CtSaving.RAW,
-    "edf": Lima.Core.CtSaving.EDF,
-    "edf-gz": Lima.Core.CtSaving.EDFGZ,
-    "edf-lz4": Lima.Core.CtSaving.EDFLZ4,
-    "edf-concat": Lima.Core.CtSaving.EDFConcat,
-    "cbf": Lima.Core.CtSaving.CBFFormat,
-    "cbf-mh": Lima.Core.CtSaving.CBFMiniHeader,
-    "nxs": Lima.Core.CtSaving.NXS,
-    "fits": Lima.Core.CtSaving.FITS,
-    "tiff": Lima.Core.CtSaving.TIFFFormat,
-    "hdf5": Lima.Core.CtSaving.HDF5,
-    "hdf5-gz": Lima.Core.CtSaving.HDF5GZ,
-    "hdf5-bs": Lima.Core.CtSaving.HDF5BS,
-}
-
-
-SavingPolicy = {
-    "abort": Lima.Core.CtSaving.Abort,
-    "overwrite": Lima.Core.CtSaving.Overwrite,
-    "append": Lima.Core.CtSaving.Append
-}
-if hasattr(Lima.Core.CtSaving, "MultiSet"):
-    SavingPolicy["multiset"] = Lima.Core.CtSaving.MultiSet
-
-
-SavingMode = {
-    "manual": Lima.Core.CtSaving.Manual,
-    "auto-frame": Lima.Core.CtSaving.AutoFrame,
-    "auto-header": Lima.Core.CtSaving.AutoHeader
-}
-
-
-SavingManagedMode = {
-    "software": Lima.Core.CtSaving.Software,
-    "hardware": Lima.Core.CtSaving.Hardware
-}
-if hasattr(Lima.Core.CtSaving, "Camera"):
-    SavingPolicy["camera"] = Lima.Core.CtSaving.Camera
-
-
-TriggerMode = {
-    "int": Lima.Core.IntTrig,
-    "int-mult": Lima.Core.IntTrigMult,
-    "ext-single": Lima.Core.ExtTrigSingle,
-    "ext-mult": Lima.Core.ExtTrigMult,
-    "ext-gate": Lima.Core.ExtGate,
-    "ext-start-stop": Lima.Core.ExtStartStop,
-    "ext-readout": Lima.Core.ExtTrigReadout
-}
+from .util import (
+    ur, ErrorMap, FileFormat, TriggerMode,
+    SavingPolicy, SavingMode, SavingManagedMode,
+)
 
 
 class ReportTask:
